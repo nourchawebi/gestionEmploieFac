@@ -1,32 +1,49 @@
-<div class="schedule-container" *ngIf="scheduleData">
-    <div class="schedule-header">
-      <h2>Emploi du temps - {{scheduleData.className}} ({{scheduleData.level}})</h2>
-    </div>
-  
-    <div class="schedule-grid">
-      <!-- Empty top-left corner -->
-      <div class="grid-header"></div>
-      
-      <!-- Time headers -->
-      <div *ngFor="let time of timeSlots" class="time-header">
-        {{time}}
-      </div>
-      
-      <!-- Days and sessions -->
-      <div *ngFor="let day of days" class="day-row">
-        <div class="day-header">{{day}}</div>
-        
-        <div *ngFor="let time of timeSlots" class="session-cell" 
-             [style.backgroundColor]="getSubjectColor(getSession(day, time)?.subject)">
-          <div *ngIf="getSession(day, time) as session" class="session-content">
-            <div class="subject">{{session.subject}}</div>
-            <div class="teacher">{{session.teacher}}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div *ngIf="!scheduleData" class="no-schedule">
-    Aucun emploi du temps disponible
-  </div>
+<mat-card class="emploi-container">
+  <mat-card-title>📅 Emploi du Temps</mat-card-title>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Sélectionnez une classe</mat-label>
+    <input matInput [(ngModel)]="selectedClass" placeholder="Ex: c1">
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" (click)="fetchSchedule()">Charger</button>
+
+  <mat-progress-spinner *ngIf="loading" mode="indeterminate" color="accent"></mat-progress-spinner>
+
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+  <table mat-table class="mat-elevation-z8" [dataSource]="hours" *ngIf="hours.length > 0"  id="timetable-table">>
+
+    <!-- Colonne des heures -->
+    <ng-container matColumnDef="hour">
+      <th mat-header-cell *matHeaderCellDef> Heure </th>
+      <td mat-cell *matCellDef="let hour"> {{ hour }} </td>
+    </ng-container>
+
+    <!-- Colonnes des jours -->
+    <ng-container *ngFor="let day of days" [matColumnDef]="day">
+      <th mat-header-cell *matHeaderCellDef> {{ day }} </th>
+      <td mat-cell *matCellDef="let hour"
+          [ngStyle]="{'background-color': timetable?.[hour]?.[day]?.subject ? subjectColors[timetable[hour][day]?.subject || ''] : 'transparent',
+                'color': 'black',
+                'text-align': 'center',
+                'border-radius': '5px',
+                'padding': '8px'}">
+        <ng-container *ngIf="timetable?.[hour]?.[day] as session">
+          <strong>{{ session.subject }}</strong><br>
+          <small>{{ session.teacher }}</small>
+        </ng-container>
+        <ng-container *ngIf="!timetable?.[hour]?.[day]">
+          -
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <!-- En-tête -->
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+    <!-- Lignes -->
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+  <button *ngIf="hours.length > 0"  mat-raised-button color="accent"  (click)="downloadPDF()">Imprimer en PDF</button>
+</mat-card>
