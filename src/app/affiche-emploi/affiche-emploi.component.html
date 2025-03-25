@@ -12,7 +12,7 @@
 
   <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
 
-  <table mat-table class="mat-elevation-z8" [dataSource]="hours" *ngIf="hours.length > 0"  id="timetable-table">>
+  <table mat-table class="mat-elevation-z8" [dataSource]="hours" *ngIf="hours.length > 0 && classefound"  id="timetable-table">>
 
     <!-- Colonne des heures -->
     <ng-container matColumnDef="hour">
@@ -45,5 +45,5 @@
     <!-- Lignes -->
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
-  <button *ngIf="hours.length > 0"  mat-raised-button color="accent"  (click)="downloadPDF()">Imprimer en PDF</button>
+  <button *ngIf="hours.length > 0 && classefound "  mat-raised-button color="accent"  (click)="downloadPDF()">Imprimer en PDF</button>
 </mat-card>
